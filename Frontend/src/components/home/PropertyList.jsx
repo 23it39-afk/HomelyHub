@@ -1,0 +1,138 @@
+import React, { useEffect, useState, useRef } from "react";
+import { Link } from "react-router-dom";
+import gsap from "gsap";
+import "../../css/Home.css";
+
+import { useDispatch, useSelector } from "react-redux";
+import { propertyAction } from "../../store/Property/property-slice";
+import { getAllProperties } from "../../store/Property/property-action";
+
+const Card = ({ id, image, name, address, price }) => {
+  return (
+    <figure className="property">
+      <Link to={`/propertylist/${id}`}>
+        <img src={image} alt="Propertyimg" />
+      </Link>
+
+      <h4>{name}</h4>
+
+      <figcaption>
+        <main className="propertydetails">
+          <h5>{name}</h5>
+
+          <h6>
+            <span className="material-symbols-outlined houseicon">
+              home_pin
+            </span>
+            {address}
+          </h6>
+
+          <p>
+            <span className="price">₹{price}</span> per night
+          </p>
+        </main>
+      </figcaption>
+    </figure>
+  );
+};
+
+const PropertyList = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const dispatch = useDispatch();
+
+  const {
+    properties = [],
+    totalProperties = 0,
+    searchParams = {},
+  } = useSelector((state) => state.properties);
+
+  const lastPage = Math.ceil(totalProperties / 12);
+
+  const propertyListRef = useRef(null);
+
+  // Page ko searchParams me update karo
+  useEffect(() => {
+    dispatch(
+      propertyAction.updateSearchParams({
+        page: currentPage,
+      })
+    );
+  }, [currentPage, dispatch]);
+
+  // Search / Filter / Page change hone par API call
+  useEffect(() => {
+    console.log("FINAL SEARCH PARAMS:", searchParams);
+
+    dispatch(getAllProperties());
+  }, [searchParams, dispatch]);
+
+  // Animation
+  useEffect(() => {
+    if (propertyListRef.current) {
+      gsap.fromTo(
+        propertyListRef.current.children,
+        {
+          y: 50,
+          opacity: 0,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out",
+        }
+      );
+    }
+  }, [properties]);
+
+  return (
+    <>
+      {properties.length === 0 ? (
+        <p className="not_found">Property not found</p>
+      ) : (
+        <div className="propertylist" ref={propertyListRef}>
+          {properties.map((property) => (
+            <Card
+              key={property._id}
+              id={property._id}
+              image={property.images?.[0]?.url}
+              name={property.propertyName}
+              address={`${property.address?.city}, ${property.address?.state} ${property.address?.pincode}`}
+              price={property.price}
+              slug={property.slug}
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="pagination">
+        <button
+          className="previous_btn"
+          onClick={() => setCurrentPage((prev) => prev - 1)}
+          disabled={currentPage === 1}
+        >
+          <span className="material-symbols-outlined">
+            arrow_back_ios_new
+          </span>
+        </button>
+
+        <button
+          className="next_btn"
+          onClick={() => setCurrentPage((prev) => prev + 1)}
+          disabled={
+            properties.length < 12 ||
+            currentPage === lastPage
+          }
+        >
+          <span className="material-symbols-outlined">
+            arrow_forward_ios
+          </span>
+        </button>
+      </div>
+    </>
+  );
+};
+
+export default PropertyList;
