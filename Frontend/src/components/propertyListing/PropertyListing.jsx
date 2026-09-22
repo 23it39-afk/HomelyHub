@@ -39,13 +39,16 @@ const PropertyListing = () => {
   description,
   images,
   amenities,
-  maximumGuests,
+  maximumGuest,
   price,
   currentBookings,
   currentBooking,
 } = property;
-
-console.log("🔥 ALL CURRENT BOOKINGS:", allCurrentBookings);
+console.log(
+  "🔥 MAX GUEST CHECK:",
+  property.maximumGuests,
+  property.maximumGuest
+);
 const allCurrentBookings = [
   ...(currentBookings || []),
   ...(currentBooking || []),
@@ -73,7 +76,7 @@ console.log("🔥 PAYMENT CURRENT BOOKINGS:", currentBookings);
             {description}
             <br />
             <br />
-            Max number of guests: {maximumGuests}
+            Max number of guests: {maximumGuest}
           </p>
 
           <hr />
@@ -87,7 +90,7 @@ console.log("🔥 PAYMENT CURRENT BOOKINGS:", currentBookings);
             price={price}
             propertyName={propertyName}
             address={address}
-            maximumGuest={maximumGuests}
+            maximumGuest={maximumGuest}
             currentBookings={allCurrentBookings}
           />
         </div>
